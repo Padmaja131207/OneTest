@@ -1,0 +1,102 @@
+parameters:
+  MAVEN_CACHE_FOLDER: ''
+  MAVEN_OPTS: ''
+  MAVEN_POM_FILE: '$(system.defaultworkingdirectory)/API/.pom/pom-parent.xml'
+  MAVEN_IMPLEMENTATION_POM_FILE: ''
+  MAVEN_OPTIONS: ''
+  GOAL_SETTINGS: ''
+  mulesoftuse: ''
+  mulesoftpassword: ''
+  artifactpassword: ''
+  artifactusername: ''
+  mulerepositorypassword: ''
+  mulerepositoryusername: ''
+  PROPERTIES_SETTINGS: '-Dencrypt.key.secure.files=$(encrypt-key-secure-files-dev) -Dpom.mulesoftuse=$(mulesoftuse) -Dpom.mulesoftpassword=$(mulesoftpassword) -Dpom.artifactpassword=$(artifactpassword) -Dpom.artifactusername=$(artifactusername) -Dpom.mulerepositorypassword=$(mulerepositorypassword) -Dpom.mulerepositoryusername=$(mulerepositoryusername)'
+
+steps:
+- script: 'wget https://downloads.apache.org/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.zip'
+
+- task: ExtractFiles@1
+  inputs:
+      archiveFilePatterns: 'apache-maven-3.8.9-bin.zip'
+      destinationFolder: '$(build.sourcesdirectory)/maven'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: implementation'
+  inputs:
+    ArtifactName: implementation
+    PathtoPublish:  ${{ parameters.PATH_TO_PUBLISH }}/implementation
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: design'
+  inputs:
+    ArtifactName: design
+    PathtoPublish: ${{ parameters.PATH_TO_PUBLISH }}/design
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: public'
+  inputs:
+    ArtifactName: public
+    PathtoPublish: ${{ parameters.PATH_PUBLIC }}/public
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Parent'
+  inputs:
+    ArtifactName: parent
+    PathtoPublish: API/.pom
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: K6'
+  inputs:
+    ArtifactName: k6
+    PathtoPublish: ${{ parameters.PATH_TO_PUBLISH }}/k6
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: E2E'
+  inputs:
+    ArtifactName: e2e
+    PathtoPublish: ${{ parameters.PATH_TO_PUBLISH }}/e2e
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Common Scripts'
+  inputs:
+    ArtifactName: common-scripts
+    PathtoPublish: API/.pipelines/commons/scripts/
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Playwright API Test'
+  inputs:
+    ArtifactName: playwright-api-test
+    PathtoPublish: API/API-Tests
+
+- task: Maven@4
+  displayName: 'Maven implementation pom'
+  inputs:
+    mavenPOMFile: '${{ parameters.MAVEN_IMPLEMENTATION_POM_FILE }}'
+    mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+    goals: 'clean install -settings ${{ parameters.GOAL_SETTINGS }} ${{ parameters.PROPERTIES_SETTINGS }}'
+    mavenVersionOption: 'Path'
+    mavenDirectory: '$(build.sourcesdirectory)/maven/apache-maven-3.8.9'
+    mavenSetM2Home: true
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Maven'
+  inputs:
+    ArtifactName: repository
+    PathtoPublish: ${{ parameters.MAVEN_CACHE_FOLDER }}
+    mavenVersionOption: 'Path'
+    mavenDirectory: '$(build.sourcesdirectory)/maven/apache-maven-3.8.9'
+    mavenSetM2Home: true
+
+# - task: CopyFiles@2
+#   displayName: 'Copy Files to artifact staging directory'
+#   inputs:
+#     Contents: '**/target/*.?(war|jar)'
+#     TargetFolder: $(Build.ArtifactStagingDirectory)
+    
+# - task: PublishBuildArtifacts@1
+#   inputs:
+#     pathToPublish: $(Build.ArtifactStagingDirectory)
+#     artifactName: MyBuildOutputs 
