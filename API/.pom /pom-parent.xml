@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<profiles>
+		<profile>
+			<id>buildingZip</id>
+			<activation>
+				<property>
+					<name>pom.buildingZip</name>
+				</property>
+			</activation>
+			<build>
+				<directory>${pom.buildingZip}</directory>
+				<finalName>${pom.jarFile}</finalName>
+			</build>
+		</profile>
+	</profiles>
+	<groupId>3f50a308-b636-4db8-84be-c62ad0c4dd31</groupId>
+	<artifactId>mule-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>mule parent</name>
+
+	<!-- General properties -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<deployment.timeout>5000000</deployment.timeout>
+		<business.groupId>3f50a308-b636-4db8-84be-c62ad0c4dd31</business.groupId>
+		<app.runtime>4.4.0</app.runtime>
+		<mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
+		<munit.version>2.3.6</munit.version>
+	</properties>
+	<!-- Build info -->
+	<build>
+		<plugins>
+		<!-- Plugin to be use in case a Maven Deployment of the API is needed. 
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<version>${mule.maven.plugin.version}</version>
+				<configuration>
+					<cloudHubDeployment>
+						<uri>https://eu1.anypoint.mulesoft.com</uri>
+						<muleVersion>4.4.0</muleVersion>
+						<businessGroupId>${business.groupId}</businessGroupId>
+						 Deploy User Parameter 
+						<username>${pom.mulesoftuse}</username>
+						<password>${pom.mulesoftpassword}</password>
+						 Environment Parameter 
+						<region>eu-central-1</region>
+						<environment>${pom.envName}</environment>
+						<applicationName>${pom.applicationName}</applicationName>
+						<workerType>Micro</workerType>
+						<objectStoreV2>true</objectStoreV2>
+						<deploymentTimeout>${deployment.timeout}</deploymentTimeout>
+						<properties>
+							<env>${pom.envName}</env>
+						</properties>
+					</cloudHubDeployment>
+				</configuration>
+				<executions>
+					<execution>
+						<id>deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			-->
+		</plugins>
+	</build>
+	<!-- Repositories info -->
+	
+	<repositories>
+	<!--
+		<repository>
+			<id>anypoint-exchange-v2</id>
+			<name>Anypoint Exchange</name>
+			<url>https://maven.eu1.anypoint.mulesoft.com/api/v2/maven</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<layout>default</layout>
+		</repository>
+		-->
+	</repositories>
+	
+	<pluginRepositories>
+	<!--
+		<pluginRepository>
+			<id>mulesoft-releases</id>
+			<name>MuleSoft Releases Repository</name>
+			<layout>default</layout>
+			<url>https://repository.mulesoft.org/releases/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		-->
+	</pluginRepositories>
+	<distributionManagement>
+		<repository>
+			<id>UAT</id>
+			<url>https://pkgs.dev.azure.com/WHOHQ/BMSDEVOPS/_packaging/UAT/maven/v1</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</distributionManagement>
+</project>
