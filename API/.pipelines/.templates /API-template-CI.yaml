@@ -1,0 +1,61 @@
+parameters:
+  MAVEN_CACHE_FOLDER: ''
+  MAVEN_OPTS: ''
+  MAVEN_POM_FILE: '$(system.defaultworkingdirectory)/API/.pom/pom-parent.xml'
+  MAVEN_IMPLEMENTATION_POM_FILE: ''
+  MAVEN_OPTIONS: ''
+  GOAL_SETTINGS: ''
+  mulesoftuse: ''
+  mulesoftpassword: ''
+  artifactpassword: ''
+  artifactusername: ''
+  mulerepositorypassword: ''
+  mulerepositoryusername: ''
+  PROPERTIES_SETTINGS: '-Dpom.mulesoftuse=$(mulesoftuse) -Dpom.mulesoftpassword=$(mulesoftpassword) -Dpom.artifactpassword=$(artifactpassword) -Dpom.artifactusername=$(artifactusername) -Dpom.mulerepositorypassword=$(mulerepositorypassword) -Dpom.mulerepositoryusername=$(mulerepositoryusername)'
+  
+steps:
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | **/pom.xml'
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+      maven
+    path: ${{ parameters.MAVEN_CACHE_FOLDER }}
+  displayName: Cache Maven local repo
+
+- task: Maven@3
+  displayName: 'Maven parent pom'
+  inputs:
+    mavenPomFile: '${{ parameters.MAVEN_POM_FILE }}'
+    mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+    goals: 'clean install -X --settings ${{ parameters.GOAL_SETTINGS }} ${{ parameters.PROPERTIES_SETTINGS }}'
+
+- task: Maven@3
+  displayName: 'Maven compile'
+  inputs:
+    mavenPomFile: '${{ parameters.MAVEN_POM_FILE }}'
+    mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+    goals: 'clean compile -X --settings ${{ parameters.GOAL_SETTINGS }}  ${{ parameters.PROPERTIES_SETTINGS }}'
+
+- task: Maven@3
+  displayName: 'Maven package'
+  inputs:
+    mavenPomFile: '${{ parameters.MAVEN_POM_FILE }}'
+    mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+    goals: 'clean package -X --settings ${{ parameters.GOAL_SETTINGS }}  ${{ parameters.PROPERTIES_SETTINGS }}'
+
+- task: Maven@3
+  displayName: 'Maven Test'
+  inputs:
+    mavenPomFile: '${{ parameters.MAVEN_POM_FILE }}'
+    mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+    goals: 'clean test -X --settings ${{ parameters.GOAL_SETTINGS }}  ${{ parameters.PROPERTIES_SETTINGS }}'
+    publishJUnitResults: true 
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+#- task: Maven@3
+#   displayName: 'Maven implementation pom'
+#   inputs:
+#     mavenPomFile: '${{ parameters.MAVEN_IMPLEMENTATION_POM_FILE }}'
+#     mavenOptions: '${{ parameters.MAVEN_OPTIONS }}'
+#     goals: 'clean install -settings ${{ parameters.GOAL_SETTINGS }} ${{ parameters.PROPERTIES_SETTINGS }}'
