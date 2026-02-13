@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - supportv5
+  paths:
+    include:
+      - /API/System-API/src/sapi-gsm-core-hq/implementation/*
+    exclude:
+      - /API/System-API/src/sapi-gsm-core-hq/design/*
+      - /API/*/src/*/implementation/src/main/resources/config/globalconfig-*.json
+      - /API/*/src/*/implementation/src/main/resources/config/globalconfig.json
+      - /API/*/src/*/implementation/src/main/resources/config/properties-local.yaml
+      - /API/*/src/*/implementation/src/main/resources/config/properties-dev.yaml
+      - /API/*/src/*/implementation/src/main/resources/config/properties-sit.yaml
+      - /API/*/src/*/implementation/src/main/resources/config/secured/secured-properties-local.yaml
+      - /API/*/src/*/implementation/src/main/resources/config/secured/secured-properties-dev.yaml
+      - /API/*/src/*/implementation/src/main/resources/config/secured/secured-properties-sit.yaml
+
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+      pr: # Optional; pr triggers are disabled by default
+        autoCancel: true # cancel the pr triggered pipelines when the pr is updated.
+        branches: # branch conditions to filter the events, optional; Defaults to all branches.
+          exclude:
+            - "*"
+
+variables:
+  - name: vmImage
+    value: "ubuntu-latest"
+  - group: Key vault
+
+stages:
+  - stage: "MuleSoft"
+    displayName: "Merge develop branch"
+    jobs:
+      - job: BuildDeploy
+        displayName: "Build & Test"
+        pool:
+          vmImage: "${{ variables.vmImage }}"
+        steps:
+          - template: "/API/.pipelines/.templates/API-template-CD.yaml"
+            parameters:
+              MAVEN_CACHE_FOLDER: "$(Pipeline.Workspace)/$(system.defaultworkingdirectory)/API/System-API/src/sapi-gsm-core-hq/.m2/repository"
+              MAVEN_OPTS: "-Dmaven.repo.local=$(Pipeline.Workspace)/$(system.defaultworkingdirectory)/API/System-API/src/sapi-gsm-core-hq/.m2/repository"
+              MAVEN_IMPLEMENTATION_POM_FILE: "$(system.defaultworkingdirectory)/API/System-API/src/sapi-gsm-core-hq/implementation/pom.xml"
+              MAVEN_OPTIONS: "-Xmx3072m -Dmaven.repo.local=$(Pipeline.Workspace)/$(system.defaultworkingdirectory)/API/System-API/src/sapi-gsm-core-hq/.m2/repository"
+              GOAL_SETTINGS: "$(system.defaultworkingdirectory)/API/System-API/public/settings.xml"
+              PATH_TO_PUBLISH: "API/System-API/src/sapi-gsm-core-hq"
+              PATH_PUBLIC: "API/System-API"
+              mulesoftpassword: "$(mulesoftpassword)"
+              mulesoftuse: "$(mulesoftuse)"
+              artifactpassword: "$(artifactpassword)"
+              artifactusername: "$(artifactusername)"
+              mulerepositorypassword: "$(mulerepositorypassword)"
+              mulerepositoryusername: "$(mulerepositoryusername)"
